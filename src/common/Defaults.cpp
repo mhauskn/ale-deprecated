@@ -31,4 +31,7 @@ void setDefaultSettings(Settings &settings) {
     // Environment customization settings
     settings.setBool("record_trajectory", false);
     settings.setBool("restricted_action_set", false);
+
+    // Display Settings
+    settings.setBool("display_screen", false);
 }

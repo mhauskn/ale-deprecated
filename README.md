@@ -5,4 +5,7 @@ The Arcade Learning Environment (ALE) is a simple object-oriented framework that
 
 http://www.arcadelearningenvironment.org/
 
-This repo contains modifications to the ALE base code.
+This repo contains the following modifications to the ALE base code:
+
+* Capable of displaying game screen as the agent learns. 
+* Ability to pause the game or start manually controlling the game.

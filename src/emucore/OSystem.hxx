@@ -37,7 +37,8 @@ class VideoDialog;
 #include "Event.hxx"  //ALE 
 //ALE  #include "Font.hxx"
 #include "bspf.hxx"
-#include "export_screen.h" //ALE 
+#include "export_screen.h" //ALE
+#include "display_screen.h" //MHAUSKN
 class EventStreamer; //ALE 
 
 struct Resolution {
@@ -541,7 +542,8 @@ class OSystem
     // Table of RGB values for GUI elements
     //ALE  static uInt32 ourGUIColors[kNumUIPalettes][kNumColors-256];
   public:
-        ExportScreen* p_export_screen;  //ALE 
+    ExportScreen* p_export_screen;  //ALE
+    DisplayScreen* p_display_screen; //MHAUSKN
   private:
     /**
       Creates the various framebuffers/renderers available in this system

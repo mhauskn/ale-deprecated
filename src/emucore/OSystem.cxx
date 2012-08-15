@@ -133,6 +133,9 @@ OSystem::~OSystem()
   if (p_export_screen) {
     delete p_export_screen;
   }
+  if (p_display_screen) {
+    delete p_display_screen;
+  }
     
   //ALE  delete aiBase; 
 }
@@ -421,6 +424,12 @@ bool OSystem::createConsole(const string& romfile)
     delete[] image;
   }
   p_export_screen = new ExportScreen(this); //ALE 
+  if (mySettings->getBool("display_screen", true)) {
+    p_display_screen = new DisplayScreen(p_export_screen);
+  } else {
+    p_display_screen = NULL;
+  }
+
   return retval;
 }
 
@@ -730,6 +739,9 @@ void OSystem::mainLoop()
         //ALE  /****************************************************
         assert(myGameController != NULL);
         myGameController->update();
+        // Display the screen if applicable
+        // if (p_display_screen)
+        //     p_display_screen->display_screen
         MediaSource& mediasrc = console().mediaSource();
         //ALE  ****************************************************/
         
@@ -738,11 +750,11 @@ void OSystem::mainLoop()
         if(myQuitLoop) break;  // Exit if the user wants to quit
         //ALE  myFrameBuffer->update();
         // Emulate, but only if we were not explicitly told not to 
-    if (mySkipEmulation) {
-      mySkipEmulation = false;
-    }
-    else
-      mediasrc.update(); //ALE 
+        if (mySkipEmulation) {
+            mySkipEmulation = false;
+        }
+        else
+            mediasrc.update(); //ALE 
         
         myTimingInfo.current = getTicks();
         myTimingInfo.virt += myTimePerFrame;
