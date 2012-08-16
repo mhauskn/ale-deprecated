@@ -739,10 +739,10 @@ void OSystem::mainLoop()
         //ALE  /****************************************************
         assert(myGameController != NULL);
         myGameController->update();
-        // Display the screen if applicable
-        // if (p_display_screen)
-        //     p_display_screen->display_screen
         MediaSource& mediasrc = console().mediaSource();
+        // Display the screen if applicable
+        if (p_display_screen)
+            p_display_screen->display_screen(mediasrc);
         //ALE  ****************************************************/
         
         myTimingInfo.start = getTicks();

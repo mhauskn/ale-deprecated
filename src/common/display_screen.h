@@ -9,33 +9,51 @@
 #include "SDL/SDL_gfxPrimitives.h"
 #include "Constants.h"
 #include "export_screen.h"
+#include "MediaSrc.hxx"
 
 class SDLEventHandler {
- public:
-  virtual void handleSDLEvent(const SDL_Event& event) = 0;
+public:
+    virtual void handleSDLEvent(const SDL_Event& event) = 0;
+
+    // Print the usage information about this handler
+    virtual void usage() = 0;
 };
 
-class DisplayScreen {
- public:
-  DisplayScreen(ExportScreen* export_screen);
-  virtual ~DisplayScreen();
+class DisplayScreen : public SDLEventHandler {
+public:
+    DisplayScreen(ExportScreen* export_screen);
+    virtual ~DisplayScreen();
 
-  void display_screen(const IntMatrix& screen_matrix, int image_widht, int image_height);
-  void display_png(const string& filename);
-  void display_bass_png(const string& filename);
-  void poll();
-  void registerEventHandler(SDLEventHandler* handler) { handlers.push_back(handler); };
+    // Displays the current frame buffer
+    void display_screen(const MediaSource& mediaSrc);
 
-  int screen_height;
-  int screen_width;
+    // Draws a png image to the screen from a file
+    void display_png(const string& filename);
 
-  bool paused;
-  bool poll_for_events;
+    // Registers a handler for keyboard and mouse events
+    void registerEventHandler(SDLEventHandler* handler);
+
+    // Implements pause functionality
+    void handleSDLEvent(const SDL_Event& event);
+
+    void usage();
+
+protected:
+    // Checks for SDL events such as keypresses.
+    // TODO: Run in a different thread?
+    void poll();
+
+    // Dimensions of the SDL window
+    int screen_height, screen_width;
+
+    // Maintains the paused/unpaused state of the game
+    bool paused;
   
-  SDL_Surface *screen, *image;
-  ExportScreen* export_screen;
+    SDL_Surface *screen, *image;
+    ExportScreen* export_screen;
 
-  std::vector<SDLEventHandler*> handlers;
+    // Handlers for SDL Events
+    std::vector<SDLEventHandler*> handlers;
 };
 
 #endif
