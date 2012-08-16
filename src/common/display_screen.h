@@ -13,7 +13,9 @@
 
 class SDLEventHandler {
 public:
-    virtual void handleSDLEvent(const SDL_Event& event) = 0;
+    // Returns true if it handles this SDL Event. False if not and the event
+    // will be passed to other handlers.
+    virtual bool handleSDLEvent(const SDL_Event& event) = 0;
 
     // Print the usage information about this handler
     virtual void usage() = 0;
@@ -34,7 +36,7 @@ public:
     void registerEventHandler(SDLEventHandler* handler);
 
     // Implements pause functionality
-    void handleSDLEvent(const SDL_Event& event);
+    bool handleSDLEvent(const SDL_Event& event);
 
     void usage();
 

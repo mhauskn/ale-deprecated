@@ -25,7 +25,7 @@ PlayerAgent::PlayerAgent(OSystem* _osystem, RomSettings* _settings) :
     p_osystem(_osystem), p_rom_settings(_settings),
     frame_number(0), episode_frame_number(0), episode_number(0),
     available_actions(_settings->getAvailableActions()),
-    m_has_terminated(false) {
+    m_has_terminated(false), manual_control(false) {
   Settings& settings = p_osystem->settings();
 
   i_max_num_episodes = settings.getInt("max_num_episodes", true);
@@ -41,7 +41,12 @@ PlayerAgent::PlayerAgent(OSystem* _osystem, RomSettings* _settings) :
     settings.getBool("restricted_action_set", false);
 
   if (!use_restricted_action_set)
-    available_actions = _settings->getAllActions(); 
+    available_actions = _settings->getAllActions();
+
+  bool display_screen = settings.getBool("display_screen", false);
+  if (display_screen) {
+      p_osystem->p_display_screen->registerEventHandler(this);
+  }
 }
 
 /* **********************************************************************
@@ -66,7 +71,14 @@ Action PlayerAgent::agent_step() {
     return RESET;
   }
 
-  Action a = act();
+  // Only take an action if manual control is disabled
+  Action a;
+  if (manual_control) {
+      a = waitForKeypress();
+  } else {
+      a = act();
+  }
+
   if (record_trajectory) record_action(a);
 
   frame_number++;
@@ -145,3 +157,88 @@ PlayerAgent* PlayerAgent::generate_agent_instance(OSystem* _osystem,
     return new_agent;
 }
 
+
+bool PlayerAgent::handleSDLEvent(const SDL_Event& event) {
+    switch(event.type) {
+    case SDL_KEYDOWN:
+        switch(event.key.keysym.sym) {
+        case SDLK_p:
+            if (manual_control) {
+                cout << "Returning to Automatic Control." << endl;
+            } else {
+                printf("Starting Manual Control. Commands are as follows:\n  -p: return to auto control\n  -arrow keys: joystick movement\n  -space: button/fire\n  -return: no-op");
+            }
+            manual_control = !manual_control;
+            return true;
+        default:
+            // If a key is pressed while manual control is active, let the manual controller handle it
+            if (manual_control) return true;
+            break;
+        }
+    default:
+        break;
+    }
+    return false;
+}
+
+void PlayerAgent::usage() {
+    printf("  -p: Toggle manual control of the agent\n");
+}
+
+Action PlayerAgent::waitForKeypress() {
+    Action a = UNDEFINED;
+    // This loop is necessary because keypress events come in quickly
+    while (a == UNDEFINED) {
+        SDL_Delay(50); // Set amount of sleep time
+        SDL_PumpEvents();
+        Uint8* keymap = SDL_GetKeyState(NULL);
+
+        // Break out of this loop if the 'p' key is pressed
+        if (keymap[SDLK_p]) {
+            return PLAYER_A_NOOP;
+
+            // Triple Actions
+        } else if (keymap[SDLK_UP] && keymap[SDLK_RIGHT] && keymap[SDLK_SPACE]) {
+            a = PLAYER_A_UPRIGHTFIRE;
+        } else if (keymap[SDLK_UP] && keymap[SDLK_LEFT] && keymap[SDLK_SPACE]) {
+            a = PLAYER_A_UPLEFTFIRE;
+        } else if (keymap[SDLK_DOWN] && keymap[SDLK_RIGHT] && keymap[SDLK_SPACE]) {
+            a = PLAYER_A_DOWNRIGHTFIRE;
+        } else if (keymap[SDLK_DOWN] && keymap[SDLK_LEFT] && keymap[SDLK_SPACE]) {
+            a = PLAYER_A_DOWNLEFTFIRE;
+
+            // Double Actions
+        } else if (keymap[SDLK_UP] && keymap[SDLK_LEFT]) {
+            a = PLAYER_A_UPLEFT;
+        } else if (keymap[SDLK_UP] && keymap[SDLK_RIGHT]) {
+            a = PLAYER_A_UPRIGHT;
+        } else if (keymap[SDLK_DOWN] && keymap[SDLK_LEFT]) {
+            a = PLAYER_A_DOWNLEFT;
+        } else if (keymap[SDLK_DOWN] && keymap[SDLK_RIGHT]) {
+            a = PLAYER_A_DOWNRIGHT;
+        } else if (keymap[SDLK_UP] && keymap[SDLK_SPACE]) {
+            a = PLAYER_A_UPFIRE;
+        } else if (keymap[SDLK_DOWN] && keymap[SDLK_SPACE]) {
+            a = PLAYER_A_DOWNFIRE;
+        } else if (keymap[SDLK_LEFT] && keymap[SDLK_SPACE]) {
+            a = PLAYER_A_LEFTFIRE;
+        } else if (keymap[SDLK_RIGHT] && keymap[SDLK_SPACE]) {
+            a = PLAYER_A_RIGHTFIRE;
+
+            // Single Actions
+        } else if (keymap[SDLK_SPACE]) {
+            a = PLAYER_A_FIRE;
+        } else if (keymap[SDLK_RETURN]) {
+            a = PLAYER_A_NOOP;
+        } else if (keymap[SDLK_LEFT]) {
+            a = PLAYER_A_LEFT;
+        } else if (keymap[SDLK_RIGHT]) {
+            a = PLAYER_A_RIGHT;
+        } else if (keymap[SDLK_UP]) {
+            a = PLAYER_A_UP;
+        } else if (keymap[SDLK_DOWN]) {
+            a = PLAYER_A_DOWN;
+        } 
+    }
+    return a;
+}

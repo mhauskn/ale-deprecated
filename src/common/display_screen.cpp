@@ -22,6 +22,8 @@ DisplayScreen::DisplayScreen(ExportScreen* _export_screen):
 
     // Register ourselves as an event handler
     registerEventHandler(this);
+
+    printf("Screen Display Active. Press 'h' for help.\n");
 }
 
 DisplayScreen::~DisplayScreen() {
@@ -50,8 +52,8 @@ void DisplayScreen::display_screen(const MediaSource& mediaSrc) {
     SDL_Surface* my_surface = SDL_CreateRGBSurface(SDL_SWSURFACE,image_width,image_height,32,rmask,gmask,bmask,amask);
 
     int r, g, b;
-    for (int y=0; y<image_height; ++y) {
-        for (int x=0; x<image_width; ++x) {
+    for (uint y=0; y<image_height; ++y) {
+        for (uint x=0; x<image_width; ++x) {
             uInt8 v = frameBuffer[y * image_width + x];
             export_screen->get_rgb_from_palette(v, r, g, b);
             pixelRGBA(my_surface,x,y,r,g,b,255);
@@ -89,7 +91,6 @@ void DisplayScreen::display_png(const string& filename) {
 
 void DisplayScreen::registerEventHandler(SDLEventHandler* handler) {
     handlers.push_back(handler);
-    handler->usage();
 };
 
 void DisplayScreen::poll() {
@@ -106,30 +107,41 @@ void DisplayScreen::poll() {
             break;
         }
 
-        // Give our event handlers a chance to deal with this event
-        for (uint i=0; i<handlers.size(); ++i) {
-            handlers[i]->handleSDLEvent(event);
+        // Give our event handlers a chance to deal with this event.
+        // Latest handlers get first chance.
+        for (int i=handlers.size()-1; i>=0; --i) {
+            if (handlers[i]->handleSDLEvent(event))
+                break;
         }
     }
 };
 
-void DisplayScreen::handleSDLEvent(const SDL_Event& event) {
+bool DisplayScreen::handleSDLEvent(const SDL_Event& event) {
     switch (event.type) {
     case SDL_KEYDOWN:
         switch(event.key.keysym.sym){
         case SDLK_SPACE:
             paused = !paused;
+            if (paused) printf("Paused...\n");
+            else printf("Unpaused...\n");
             while(paused) {
                 poll();
                 SDL_Delay(10);
+            }
+            return true;
+        case SDLK_h: // Print help info
+            printf("Screen Display Commands:\n");
+            for (uint i=0; i<handlers.size(); ++i) {
+                handlers[i]->usage();
             }
             break;
         default:
             break;
         }
     }
+    return false;
 };
 
 void DisplayScreen::usage() {
-    printf("Screen display active: \n\tSpace Bar: Pause/Unpause game.\n");
+    printf("  -h: print help info\n  -Space Bar: Pause/Unpause game.\n");
 };
