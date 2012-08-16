@@ -73,7 +73,6 @@ enum Action {
 
 string action_to_string(Action a);
 
-
 //  Define datatypes
 typedef vector<int>         IntVect;
 typedef vector<Action>      ActionVect;

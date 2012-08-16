@@ -26,8 +26,12 @@ public:
     DisplayScreen(ExportScreen* export_screen);
     virtual ~DisplayScreen();
 
-    // Displays the current frame buffer
+    // Displays the current frame buffer directly from the mediasource
     void display_screen(const MediaSource& mediaSrc);
+
+    // Displays a screen_matrix. Typically used by classes that draw custom
+    // things to the screen.
+    void display_screen(const IntMatrix& screen_matrix, int image_widht, int image_height);
 
     // Draws a png image to the screen from a file
     void display_png(const string& filename);
@@ -40,13 +44,13 @@ public:
 
     void usage();
 
+    // Dimensions of the SDL window
+    int screen_height, screen_width;
+
 protected:
     // Checks for SDL events such as keypresses.
     // TODO: Run in a different thread?
     void poll();
-
-    // Dimensions of the SDL window
-    int screen_height, screen_width;
 
     // Maintains the paused/unpaused state of the game
     bool paused;

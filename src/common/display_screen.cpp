@@ -69,6 +69,40 @@ void DisplayScreen::display_screen(const MediaSource& mediaSrc) {
     poll(); // Check for quit event
 }
 
+void DisplayScreen::display_screen(const IntMatrix& screen_matrix, int image_width, int image_height) {
+  Uint32 rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+  rmask = 0xff000000;
+  gmask = 0x00ff0000;
+  bmask = 0x0000ff00;
+  amask = 0x000000ff;
+#else
+  rmask = 0x000000ff;
+  gmask = 0x0000ff00;
+  bmask = 0x00ff0000;
+  amask = 0xff000000;
+#endif
+
+  SDL_Surface* my_surface = SDL_CreateRGBSurface(SDL_SWSURFACE,image_width,image_height,32,rmask,gmask,bmask,amask);
+
+  int r, g, b;
+  for (int y=0; y<image_height; ++y) {
+    for (int x=0; x<image_width; ++x) {
+      export_screen->get_rgb_from_palette(screen_matrix[y][x], r, g, b);
+      pixelRGBA(my_surface,x,y,r,g,b,255);
+    }
+  }
+
+  SDL_Surface* zoomed = zoomSurface(my_surface,screen->w/(double)image_width,screen->h/(double)image_height,0);
+  SDL_BlitSurface(zoomed, NULL, screen, NULL);
+
+  SDL_Flip(screen);
+  SDL_FreeSurface(my_surface);
+  SDL_FreeSurface(zoomed);
+  poll(); // Check for quit event
+}
+
+
 void DisplayScreen::display_png(const string& filename) {
     image = IMG_Load(filename.c_str());
     if ( !image ) {
