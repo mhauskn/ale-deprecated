@@ -39,7 +39,9 @@ class VideoDialog;
 #include "bspf.hxx"
 #include "export_screen.h" //ALE
 #include "display_screen.h" //MHAUSKN
+#include "visual_processor.h" //MHAUSKN
 class EventStreamer; //ALE 
+class VisualProcessor; // MHAUSKN
 
 struct Resolution {
   uInt32 width;
@@ -544,6 +546,7 @@ class OSystem
   public:
     ExportScreen* p_export_screen;  //ALE
     DisplayScreen* p_display_screen; //MHAUSKN
+    VisualProcessor* p_vis_proc; //MHAUSKN
   private:
     /**
       Creates the various framebuffers/renderers available in this system

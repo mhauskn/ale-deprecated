@@ -108,7 +108,7 @@ void InternalController::update() {
   // If we were in a non-terminal state, take the next action
   if (!resetRequested && !isTerminal) {
     e_previous_a_action = player_a_action;
-	  e_previous_b_action = player_b_action;
+    e_previous_b_action = player_b_action;
 
     state.apply_action(player_a_action, player_b_action);
   }

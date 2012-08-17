@@ -10,6 +10,7 @@
 #include "visual_processor.h"
 #include "random_tools.h"
 #include "../emucore/m6502/src/System.hxx"
+#include "../games/Roms.hpp"
 #include <limits>
 #include <sstream>
 #include <omp.h>
@@ -438,19 +439,29 @@ void Prototype::to_string(bool verbose) {
     }
 }
 
-VisualProcessor::VisualProcessor(OSystem* _osystem, RomSettings* _game_settings) : 
+VisualProcessor::VisualProcessor(OSystem* _osystem, string myRomFile) : 
     p_osystem(_osystem),
-    game_settings(_game_settings),
+    game_settings(NULL),
     max_history_len(50), //numeric_limits<int>::max()),
     blob_ids(0), obj_ids(0), proto_ids(0),
     self_id(-1),
     focused_entity_id(-1), focus_level(-1), display_mode(0), display_self(false),
     proto_indx(-2)
 {
+    game_settings = buildRomRLWrapper(myRomFile);
+
     // Get the height and width of the screen
     MediaSource& mediasrc = p_osystem->console().mediaSource();
     screen_width  = mediasrc.width();
     screen_height = mediasrc.height();
+
+    // Initialize our screen matrix
+    for (int i=0; i<screen_height; ++i) { 
+        IntVect row;
+        for (int j=0; j<screen_width; ++j)
+            row.push_back(-1);
+        screen_matrix.push_back(row);
+    }
 
     // Load up saved self images
     using namespace boost::filesystem;
@@ -477,6 +488,19 @@ VisualProcessor::VisualProcessor(OSystem* _osystem, RomSettings* _game_settings)
     // Register ourselves as an event handler if a screen is present
     if (p_osystem->p_display_screen)
         p_osystem->p_display_screen->registerEventHandler(this);
+};
+
+void VisualProcessor::process_image(const MediaSource& mediaSrc, Action action) {
+    uInt8* pi_curr_frame_buffer = mediaSrc.currentFrameBuffer();
+    int ind_i, ind_j;
+    for (int i = 0; i < screen_width * screen_height; i++) {
+        uInt8 v = pi_curr_frame_buffer[i];
+        ind_i = i / screen_width;
+        ind_j = i - (ind_i * screen_width);
+        screen_matrix[ind_i][ind_j] = v;
+    }
+
+    process_image(&screen_matrix, action);
 };
 
 void VisualProcessor::process_image(const IntMatrix* screen_matrix, Action action) {
@@ -1228,19 +1252,19 @@ void VisualProcessor::loadPrototype(boost::filesystem::path p, const string& pre
 };
 
 bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
+    bool refreshDisplay = false;
+
     switch(event.type) {
     case SDL_MOUSEBUTTONDOWN:
         if (event.button.button == 1) {
-            int sdl_screen_width = p_osystem->p_display_screen->screen_width;
-            int sdl_screen_height = p_osystem->p_display_screen->screen_height;
+            int sdl_screen_width = p_osystem->p_display_screen->window_width;
+            int sdl_screen_height = p_osystem->p_display_screen->window_height;
             int approx_x = (screen_width * event.button.x) / sdl_screen_width;
             int approx_y = (screen_height * event.button.y) / sdl_screen_height;
 
             focused_entity_id = -1;
             // Look for an object that falls under these coordinates
-            if (focus_level < 0)
-                break;
-            else if (focus_level == 0) {
+            if (focus_level == 0) {
                 // Find a blob that is under the click
                 for (map<long,Blob>::iterator it=curr_blobs.begin(); it != curr_blobs.end(); it++) {
                     Blob& b = it->second;
@@ -1281,16 +1305,13 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
                     }
                 }
             } else {
-                printf("Unexpected focus level: %d. Not sure what type of object to display.\n",
+                printf("Unexpected focus level: %d. Press 'q/w/e' to focus.\n",
                        focus_level);
             }
             // TODO: Consolidate all of these display screen calls
-            // Update the screen
-            if (screen_hist.size() >= 1) {
-                IntMatrix screen_cpy(screen_hist.back());
-                display_screen(screen_cpy);
-                p_osystem->p_display_screen->display_screen(screen_cpy, screen_cpy[0].size(),
-                                                            screen_cpy.size());
+            // Update the screen if an object has been found
+            if (screen_hist.size() >= 1 && focused_entity_id != -1) {
+                refreshDisplay = true;
             }
         }
         break;
@@ -1299,15 +1320,19 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
         switch(event.key.keysym.sym) {
         case SDLK_0:
             display_mode = 0;
+            refreshDisplay = true;
             break;
         case SDLK_1:
             display_mode = display_mode == 1 ? 0 : 1;
+            refreshDisplay = true;
             break;
         case SDLK_2:
             display_mode = display_mode == 2 ? 0 : 2;
+            refreshDisplay = true;
             break;
         case SDLK_3:
             display_mode = display_mode == 3 ? 0 : 3;
+            refreshDisplay = true;
             break;
         case SDLK_4:
             display_self = !display_self;
@@ -1315,6 +1340,7 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
                 printf("Displaying the self agent.\n");
             else
                 printf("Disabled self display.\n");
+            refreshDisplay = true;
             break;
         case SDLK_s: // Saves the mask for the current selection
             // Add the mask to the selected proto's list of masks if saving goes well
@@ -1326,7 +1352,7 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
                     manual_self.masks.push_back(composite_objs[focused_entity_id].mask);
                 }
             }
-            break;
+            return true;
         case SDLK_q:
             if (focus_level == 0) {
                 focus_level = -1;
@@ -1334,7 +1360,7 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
                 focus_level = 0;
                 printf("Focusing on Blobs.\n");
             }
-            break;
+            return true;
         case SDLK_w:
             if (focus_level == 1) {
                 focus_level = -1;
@@ -1342,7 +1368,7 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
                 focus_level = 1;
                 printf("Focusing on Objects.\n");
             }
-            break;
+            return true;
         case SDLK_e:
             if (focus_level == 2) {
                 focus_level = -1;
@@ -1350,7 +1376,7 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
                 focus_level = 2;
                 printf("Focusing on Prototypes.\n");
             }
-            break;
+            return true;
         case SDLK_i: // Get info about the currently selected object/blob/prototype
             if (focus_level < 0 || focused_entity_id < 0)
                 break;
@@ -1366,7 +1392,7 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
                         obj_classes[i].to_string(true);
                 }
             }
-            break;
+            return true;
         case SDLK_m: // Cycles through prototypes printing info at each step
             // Cycle the selection
             proto_indx++;
@@ -1385,7 +1411,7 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
             }
             // Focus on objects
             focus_level = 1;
-            break;
+            return true;
         case SDLK_n: // Create and select a new prototype
             if (manual_obj_classes.size() > 0 && manual_obj_classes.back().masks.size() == 0) {
                 printf("Empty object class already detected.\n");
@@ -1395,35 +1421,32 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
             manual_obj_classes.push_back(Prototype());
             proto_indx = manual_obj_classes.size()-1;
             focus_level = 1;
-            break;
-        default:
+            return true;
+        default: // switch(sdl.keydown)
             break;
         }
-        // Update the screen
-        if (screen_hist.size() >= 1) {
-            IntMatrix screen_cpy(screen_hist.back());
-            display_screen(screen_cpy);
-            p_osystem->p_display_screen->display_screen(screen_cpy, screen_cpy[0].size(), screen_cpy.size());
-        }
-        break;
     
-    case SDL_VIDEORESIZE:
-        // Update the screen
-        if (screen_hist.size() >= 1) {
-            IntMatrix screen_cpy(screen_hist.back());
-            display_screen(screen_cpy);
-            p_osystem->p_display_screen->display_screen(screen_cpy, screen_cpy[0].size(), screen_cpy.size());
-        }
-        break;
-
-    default:
+    default: // switch(event.type)
         break;
     }
+
+    if (refreshDisplay) {
+        IntMatrix screen_cpy(screen_hist.back());
+        display_screen(screen_cpy, screen_width, screen_height);
+        p_osystem->p_display_screen->display_screen(screen_cpy, screen_cpy[0].size(),screen_cpy.size());
+                                                    
+        return true;
+    }
+
     return false;
 };
 
+void VisualProcessor::usage() {
+    printf("  -1: Toggle Blob View\n  -2: Toggle Object View\n  -3: Toggle Prototype View\n  -4: Toggle display of self object\n  -q: Mouse select Blobs\n  -w: Mouse select objects\n  -e: Mouse Select Prototypes\n  -i: Get info about current selection\n  -m: Cycle through current prototypes\n  -n: Create a new prototype\n  -s: Save currently selected object to selected prototype\n");
+};
+
 // Overrides the normal display screen method to alter our display
-void VisualProcessor::display_screen(IntMatrix& screen_cpy) {
+void VisualProcessor::display_screen(IntMatrix& screen_cpy, int screen_width, int screen_height) {
     switch (display_mode) {
     case 1:
         plot_blobs(screen_cpy);

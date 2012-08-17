@@ -1,8 +1,9 @@
 #include "display_screen.h"
 
 
-DisplayScreen::DisplayScreen(ExportScreen* _export_screen):
-    screen_height(420), screen_width(337), paused(false), export_screen(_export_screen)
+DisplayScreen::DisplayScreen(ExportScreen* _export_screen, int _screen_width, int _screen_height):
+    window_height(420), window_width(337), paused(false), export_screen(_export_screen),
+    screen_height(_screen_height), screen_width(_screen_width)
 {
     // Initialise SDL Video */
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -10,7 +11,7 @@ DisplayScreen::DisplayScreen(ExportScreen* _export_screen):
         exit(1);
     }
 
-    screen = SDL_SetVideoMode(screen_width,screen_height, 0, SDL_HWPALETTE|SDL_DOUBLEBUF|SDL_RESIZABLE);
+    screen = SDL_SetVideoMode(window_width,window_height, 0, SDL_HWPALETTE|SDL_DOUBLEBUF|SDL_RESIZABLE);
 	
     if (screen == NULL) {
         printf("Couldn't Initialize Screen: %s\n", SDL_GetError());
@@ -19,6 +20,14 @@ DisplayScreen::DisplayScreen(ExportScreen* _export_screen):
 
     // Set the screen title
     SDL_WM_SetCaption("A.L.E. Viz", NULL);
+
+    // Initialize our screen matrix
+    for (int i=0; i<screen_height; ++i) { 
+        IntVect row;
+        for (int j=0; j<screen_width; ++j)
+            row.push_back(-1);
+        screen_matrix.push_back(row);
+    }
 
     // Register ourselves as an event handler
     registerEventHandler(this);
@@ -32,6 +41,23 @@ DisplayScreen::~DisplayScreen() {
 }
 
 void DisplayScreen::display_screen(const MediaSource& mediaSrc) {
+    // Convert the media sources frame into the screen matrix representation
+    uInt8* pi_curr_frame_buffer = mediaSrc.currentFrameBuffer();
+    int ind_i, ind_j;
+    for (int i = 0; i < screen_width * screen_height; i++) {
+        uInt8 v = pi_curr_frame_buffer[i];
+        ind_i = i / screen_width;
+        ind_j = i - (ind_i * screen_width);
+        screen_matrix[ind_i][ind_j] = v;
+    }
+
+    // Give our handlers a chance to mess with the screen
+    for (int i=handlers.size()-1; i>=0; --i) {
+        handlers[i]->display_screen(screen_matrix, screen_width, screen_height);
+    }
+}
+
+void DisplayScreen::display_screen(IntMatrix& screen_matrix, int screen_width, int screen_height) {
     Uint32 rmask, gmask, bmask, amask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     rmask = 0xff000000;
@@ -45,61 +71,23 @@ void DisplayScreen::display_screen(const MediaSource& mediaSrc) {
     amask = 0xff000000;
 #endif
 
-    uInt32 image_width = mediaSrc.width();
-    uInt32 image_height = mediaSrc.height();
-    uInt8* frameBuffer = mediaSrc.currentFrameBuffer();
-
-    SDL_Surface* my_surface = SDL_CreateRGBSurface(SDL_SWSURFACE,image_width,image_height,32,rmask,gmask,bmask,amask);
+    SDL_Surface* my_surface = SDL_CreateRGBSurface(SDL_SWSURFACE,screen_width,screen_height,32,rmask,gmask,bmask,amask);
 
     int r, g, b;
-    for (uint y=0; y<image_height; ++y) {
-        for (uint x=0; x<image_width; ++x) {
-            uInt8 v = frameBuffer[y * image_width + x];
-            export_screen->get_rgb_from_palette(v, r, g, b);
+    for (int y=0; y<screen_height; ++y) {
+        for (int x=0; x<screen_width; ++x) {
+            export_screen->get_rgb_from_palette(screen_matrix[y][x], r, g, b);
             pixelRGBA(my_surface,x,y,r,g,b,255);
         }
     }
 
-    SDL_Surface* zoomed = zoomSurface(my_surface,screen->w/(double)image_width,screen->h/(double)image_height,0);
+    SDL_Surface* zoomed = zoomSurface(my_surface,screen->w/(double)screen_width,screen->h/(double)screen_height,0);
     SDL_BlitSurface(zoomed, NULL, screen, NULL);
 
     SDL_Flip(screen);
     SDL_FreeSurface(my_surface);
     SDL_FreeSurface(zoomed);
     poll(); // Check for quit event
-}
-
-void DisplayScreen::display_screen(const IntMatrix& screen_matrix, int image_width, int image_height) {
-  Uint32 rmask, gmask, bmask, amask;
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-  rmask = 0xff000000;
-  gmask = 0x00ff0000;
-  bmask = 0x0000ff00;
-  amask = 0x000000ff;
-#else
-  rmask = 0x000000ff;
-  gmask = 0x0000ff00;
-  bmask = 0x00ff0000;
-  amask = 0xff000000;
-#endif
-
-  SDL_Surface* my_surface = SDL_CreateRGBSurface(SDL_SWSURFACE,image_width,image_height,32,rmask,gmask,bmask,amask);
-
-  int r, g, b;
-  for (int y=0; y<image_height; ++y) {
-    for (int x=0; x<image_width; ++x) {
-      export_screen->get_rgb_from_palette(screen_matrix[y][x], r, g, b);
-      pixelRGBA(my_surface,x,y,r,g,b,255);
-    }
-  }
-
-  SDL_Surface* zoomed = zoomSurface(my_surface,screen->w/(double)image_width,screen->h/(double)image_height,0);
-  SDL_BlitSurface(zoomed, NULL, screen, NULL);
-
-  SDL_Flip(screen);
-  SDL_FreeSurface(my_surface);
-  SDL_FreeSurface(zoomed);
-  poll(); // Check for quit event
 }
 
 

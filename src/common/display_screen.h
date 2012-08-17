@@ -17,21 +17,25 @@ public:
     // will be passed to other handlers.
     virtual bool handleSDLEvent(const SDL_Event& event) = 0;
 
+    // This gives the handler a chance to draw on or modify the screen that
+    // will be displayed. This is done by modifying the screen_matrix.
+    virtual void display_screen(IntMatrix& screen_matrix, int screen_width, int screen_height) = 0;
+
     // Print the usage information about this handler
     virtual void usage() = 0;
 };
 
 class DisplayScreen : public SDLEventHandler {
 public:
-    DisplayScreen(ExportScreen* export_screen);
+    DisplayScreen(ExportScreen* export_screen, int screen_width, int screen_height);
     virtual ~DisplayScreen();
 
     // Displays the current frame buffer directly from the mediasource
     void display_screen(const MediaSource& mediaSrc);
 
-    // Displays a screen_matrix. Typically used by classes that draw custom
-    // things to the screen.
-    void display_screen(const IntMatrix& screen_matrix, int image_widht, int image_height);
+    // Displays a screen_matrix. This is called after all other handlers
+    // draw on the screen.
+    void display_screen(IntMatrix& screen_matrix, int image_width, int image_height);
 
     // Draws a png image to the screen from a file
     void display_png(const string& filename);
@@ -45,7 +49,7 @@ public:
     void usage();
 
     // Dimensions of the SDL window
-    int screen_height, screen_width;
+    int window_height, window_width;
 
 protected:
     // Checks for SDL events such as keypresses.
@@ -57,6 +61,10 @@ protected:
   
     SDL_Surface *screen, *image;
     ExportScreen* export_screen;
+
+    // Matrix representation of the screen
+    IntMatrix screen_matrix;
+    int screen_height, screen_width;
 
     // Handlers for SDL Events
     std::vector<SDLEventHandler*> handlers;

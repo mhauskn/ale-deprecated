@@ -12,13 +12,14 @@
 
 #include <deque>
 #include "Constants.h"
+#include "display_screen.h"
+#include "../games/RomSettings.hpp"
+#include "../emucore/OSystem.hxx"
+#include "../emucore/MediaSrc.hxx"
 #include <boost/unordered_set.hpp>
 #include <boost/filesystem.hpp>
 #include <set>
 #include <map>
-#include "display_screen.h"
-#include "../games/RomSettings.hpp"
-#include "../emucore/OSystem.hxx"
 
 
 // Search a map for a key and returns default value if not found
@@ -228,9 +229,11 @@ struct Prototype {
 
 
 class VisualProcessor : public SDLEventHandler {
- public:
-    VisualProcessor(OSystem* _osystem, RomSettings* _game_settings);
+public:
+    VisualProcessor(OSystem* _osystem, string myRomFile);
         
+    void process_image(const MediaSource& mediaSrc, Action a);
+
     // Given a screen it will do object detection on that screen and
     // return the results.
     void process_image(const IntMatrix* screen_matrix, Action a);
@@ -264,8 +267,10 @@ class VisualProcessor : public SDLEventHandler {
     // Returns true if a self object has been located.
     bool found_self();
 
-    virtual void display_screen(IntMatrix& screen_matrix);
+    // Methods for the SDLEventHandler class
     bool handleSDLEvent(const SDL_Event& event);
+    void display_screen(IntMatrix& screen_matrix, int screen_width, int screen_height);
+    void usage();
 
     // Plotting methods
     void plot_blobs(IntMatrix& screen_matrix);      // Plots the blobs on screen
@@ -287,6 +292,7 @@ public:
     OSystem* p_osystem;
     RomSettings* game_settings;
     int screen_width, screen_height;
+    IntMatrix screen_matrix;
 
     // History of past screens, actions, and blobs
     int max_history_len;

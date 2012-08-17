@@ -166,7 +166,7 @@ bool PlayerAgent::handleSDLEvent(const SDL_Event& event) {
             if (manual_control) {
                 cout << "Returning to Automatic Control." << endl;
             } else {
-                printf("Starting Manual Control. Commands are as follows:\n  -p: return to auto control\n  -arrow keys: joystick movement\n  -space: button/fire\n  -return: no-op");
+                printf("Starting Manual Control. Commands are as follows:\n  -p: return to auto control\n  -arrow keys: joystick movement\n  -space: button/fire\n  -return: no-op\n");
             }
             manual_control = !manual_control;
             return true;

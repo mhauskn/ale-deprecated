@@ -66,6 +66,9 @@ class GameController {
 
         void systemReset();
 
+        Action getPreviousActionA() { return e_previous_a_action; };
+        Action getPreviousActionB() { return e_previous_b_action; };
+
     protected:
         OSystem* p_osystem;         // Pointer to Stella's OSystem object
         Event* p_global_event_obj;  // Pointer to the global event object

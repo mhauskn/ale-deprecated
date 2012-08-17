@@ -63,7 +63,9 @@ OSystem::OSystem()
     myEvent(NULL),          //ALE 
 //  myEventStreamer(NULL),  //ALE 
     myGameController(NULL), //ALE 
-    p_export_screen(NULL),  //ALE 
+    p_export_screen(NULL),  //ALE
+    p_display_screen(NULL), //ALE
+    p_vis_proc(NULL),       //ALE
     //ALE  myFrameBuffer(NULL),
     mySound(NULL),
     mySettings(NULL),
@@ -131,10 +133,13 @@ OSystem::~OSystem()
 //  delete myEventStreamer; //ALE 
   delete myEvent;           //ALE 
   if (p_export_screen) {
-    delete p_export_screen;
+      delete p_export_screen;
   }
   if (p_display_screen) {
-    delete p_display_screen;
+      delete p_display_screen;
+  }
+  if (p_vis_proc) {
+      delete p_vis_proc;
   }
     
   //ALE  delete aiBase; 
@@ -155,7 +160,6 @@ bool OSystem::create()
   //ALE   myFont         = new GUI::Font(GUI::stellaDesc);
   //ALE   myLauncherFont = new GUI::Font(GUI::stellaDesc);
   //ALE   myConsoleFont  = new GUI::Font(GUI::consoleDesc);
-
   // Create the event handler for the system
   //ALE   myEventHandler = new EventHandler(this);
   //ALE  myEventHandler->initialize();
@@ -424,10 +428,16 @@ bool OSystem::createConsole(const string& romfile)
     delete[] image;
   }
   p_export_screen = new ExportScreen(this); //ALE 
+
   if (mySettings->getBool("display_screen", true)) {
-    p_display_screen = new DisplayScreen(p_export_screen);
-  } else {
-    p_display_screen = NULL;
+      int screen_width = myConsole->mediaSource().width();
+      int screen_height = myConsole->mediaSource().height();
+      p_display_screen = new DisplayScreen(p_export_screen, screen_width, screen_height);
+  }
+
+  if (mySettings->getBool("process_screen", true)) {
+      printf("Starting Visual Processing\n");
+      p_vis_proc = new VisualProcessor(this, myRomFile);
   }
 
   return retval;
@@ -740,9 +750,10 @@ void OSystem::mainLoop()
         assert(myGameController != NULL);
         myGameController->update();
         MediaSource& mediasrc = console().mediaSource();
-        // Display the screen if applicable
-        if (p_display_screen)
+        if (p_display_screen) // Display the screen if applicable
             p_display_screen->display_screen(mediasrc);
+        if (p_vis_proc) // Do visual processing if applicable
+            p_vis_proc->process_image(mediasrc, myGameController->getPreviousActionA());
         //ALE  ****************************************************/
         
         myTimingInfo.start = getTicks();

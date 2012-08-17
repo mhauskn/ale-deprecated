@@ -60,6 +60,7 @@ public:
        using the keyboard.
        * ****************************************************************** */
     bool handleSDLEvent(const SDL_Event& event);
+    void display_screen(IntMatrix& screen_matrix, int screen_width, int screen_height) {};
     void usage();
 
     /** Returns true when the agent is done playing the game. */
