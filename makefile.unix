@@ -2,7 +2,6 @@
 # makefile for the A.L.E: Atari Learing Environment (Powered by Stella)
 ##============================================================================
 
-
 srcdir      ?= .
 DEFINES     := -DRLGENV_NOMAINLOOP
 LDFLAGS     := 
@@ -86,8 +85,9 @@ endif
 #######################################################################
 
 EXECUTABLE  := ale$(EXEEXT)
+LIBRARY := libale.so
 
-all: tags $(EXECUTABLE)
+all: tags $(EXECUTABLE) $(LIBRARY)
 
 
 ######################################################################
@@ -135,12 +135,16 @@ DEPFILES =
 $(EXECUTABLE):  $(OBJS)
 	$(LD) $(LDFLAGS) $(PRE_OBJS_FLAGS) $+ $(POST_OBJS_FLAGS) $(LIBS) $(PROF) -o $@
 
+$(LIBRARY): $(OBJS)
+	$(LD) $(LDFLAGS) -shared -o $(LIBRARY) $(OBJS)        
+
 distclean: clean
 	$(RM_REC) $(DEPDIRS)
 	$(RM) build.rules config.h config.mak config.log
 
 clean:
-	$(RM) $(OBJS) $(EXECUTABLE)
+	$(RM) $(OBJS) $(EXECUTABLE) $(LIBRARY)
+
 
 
 
