@@ -20,7 +20,7 @@
 #define EXPORT_SCREEN_H
 
 #include <vector>
-#include "Props.hxx"
+#include "../emucore/Props.hxx"
 #include "Constants.h"
 
 class OSystem;

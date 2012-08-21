@@ -16,10 +16,10 @@
 #ifndef __INTERNAL_CONTROLLER_H__
 #define __INTERNAL_CONTROLLER_H__
 
-#include "Constants.h"
+#include "../common/Constants.h"
 #include "game_controller.h"
-#include "PlayerAgent.hpp"
-#include "RomSettings.hpp"
+#include "../agents/PlayerAgent.hpp"
+#include "../games/RomSettings.hpp"
 
 
 class InternalController : public GameController {

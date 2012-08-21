@@ -15,10 +15,10 @@
 #ifndef __PLAYER_AGENT_HPP__
 #define __PLAYER_AGENT_HPP__
 
-#include "OSystem.hxx"
-#include "Constants.h"
-#include "RomSettings.hpp"
-#include "display_screen.h"
+#include "../emucore/OSystem.hxx"
+#include "../common/Constants.h"
+#include "../games/RomSettings.hpp"
+#include "../common/display_screen.h"
 
 class PlayerAgent : public SDLEventHandler {
 public:

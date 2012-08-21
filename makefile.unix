@@ -62,7 +62,7 @@ ifdef CXXFLAGS
 else
   CXXFLAGS:= -O2
 endif
-CXXFLAGS+= -Wall -Wno-multichar -Wunused -fno-rtti
+CXXFLAGS+= -Wall -Wno-multichar -Wunused -fno-rtti -fPIC
 
 ifeq ("$(DEBUG)", "1")
   CXXFLAGS += -g

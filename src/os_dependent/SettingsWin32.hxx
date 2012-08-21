@@ -21,7 +21,7 @@
 
 class OSystem;
 
-#include "bspf.hxx"
+#include "../emucore/m6502/src/bspf/src/bspf.hxx"
 
 
 class SettingsWin32 : public Settings

@@ -19,8 +19,8 @@
 #define __ROMSETTINGS_HPP__
 
 #include "../common/Constants.h"
-#include "Serializer.hxx"
-#include "Deserializer.hxx"
+#include "../emucore/Serializer.hxx"
+#include "../emucore/Deserializer.hxx"
 
 class System;
 

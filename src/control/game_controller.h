@@ -18,10 +18,10 @@
 #ifndef __GAME_CONTROLLER_H__
 #define __GAME_CONTROLLER_H__
 
-#include "OSystem.hxx"
-#include "System.hxx"
+#include "../emucore/OSystem.hxx"
+#include "../emucore/m6502/src/System.hxx"
 #include "ALEState.hpp"
-#include "Constants.h"
+#include "../common/Constants.h"
 
 #define PADDLE_DELTA 23000
 // MGB Values taken from Paddles.cxx (Stella 3.3) - 1400000 * [5,235] / 255
@@ -65,6 +65,8 @@ class GameController {
         void loadState();
 
         void systemReset();
+
+        ALEState* getState() { return &state; };
 
         Action getPreviousActionA() { return e_previous_a_action; };
         Action getPreviousActionB() { return e_previous_b_action; };

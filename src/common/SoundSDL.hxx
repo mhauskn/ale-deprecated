@@ -25,8 +25,8 @@ class OSystem;
 
 #include <SDL/SDL.h>
 
-#include "Sound.hxx"
-#include "bspf.hxx"
+#include "../emucore/Sound.hxx"
+#include "../emucore/m6502/src/bspf/src/bspf.hxx"
 #include "MediaSrc.hxx"
 #include "TIASnd.hxx"
 

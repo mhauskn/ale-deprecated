@@ -19,7 +19,7 @@
 #ifndef __FIFO_CONTROLLER_H__
 #define __FIFO_CONTROLLER_H__
 
-#include "Constants.h"
+#include "../common/Constants.h"
 #include "game_controller.h"
 
 class RomSettings;

@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <cstdlib> 
-#include "bspf.hxx"
+#include "../emucore/m6502/src/bspf/src/bspf.hxx"
 
 /* *********************************************************************
     Returns a random integer within the [lowest, highest] range.

@@ -34,10 +34,10 @@
 #ifndef __ALESTATE_HPP__ 
 #define __ALESTATE_HPP__
 
-#include "OSystem.hxx"
-#include "Event.hxx"
+#include "../emucore/OSystem.hxx"
+#include "../emucore/Event.hxx"
 #include <string>
-#include "RomSettings.hpp"
+#include "../games/RomSettings.hpp"
 
 #define PADDLE_DELTA 23000
 // MGB Values taken from Paddles.cxx (Stella 3.3) - 1400000 * [5,235] / 255

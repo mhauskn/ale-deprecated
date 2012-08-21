@@ -21,7 +21,7 @@
 #include <vector>
 #include <valarray>
 #include <cstdlib>
-#include "bspf.hxx"
+#include "../emucore/m6502/src/bspf/src/bspf.hxx"
 
 
 // Define actions

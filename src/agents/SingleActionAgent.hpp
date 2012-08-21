@@ -18,9 +18,9 @@
 #ifndef __SINGLE_ACTION_AGENT_HPP__
 #define __SINGLE_ACTION_AGENT_HPP__
 
-#include "Constants.h"
+#include "../common/Constants.h"
 #include "PlayerAgent.hpp"
-#include "OSystem.hxx"
+#include "../emucore/OSystem.hxx"
 
 class SingleActionAgent : public PlayerAgent {
     public:

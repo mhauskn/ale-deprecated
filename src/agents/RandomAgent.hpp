@@ -17,9 +17,9 @@
 #ifndef __RANDOM_AGENT_HPP__
 #define __RANDOM_AGENT_HPP__
 
-#include "Constants.h"
+#include "../common/Constants.h"
 #include "PlayerAgent.hpp"
-#include "OSystem.hxx"
+#include "../emucore/OSystem.hxx"
 
 class RandomAgent : public PlayerAgent {
     public:

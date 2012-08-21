@@ -14,27 +14,27 @@
 #include <sstream>
 #include <memory>
 
-#include "bspf.hxx"
-#include "Console.hxx"
-#include "Event.hxx"
-#include "PropsSet.hxx"
-#include "Settings.hxx"
-#include "FSNode.hxx"
-#include "OSystem.hxx"
+#include "emucore/m6502/src/bspf/src/bspf.hxx"
+#include "emucore/Console.hxx"
+#include "emucore/Event.hxx"
+#include "emucore/PropsSet.hxx"
+#include "emucore/Settings.hxx"
+#include "emucore/FSNode.hxx"
+#include "emucore/OSystem.hxx"
 
-#include "Defaults.hpp"
+#include "common/Defaults.hpp"
 
 #ifdef WIN32
-#   include "SettingsWin32.hxx"
-#   include "OSystemWin32.hxx"
+#   include "os_dependent/SettingsWin32.hxx"
+#   include "os_dependent/OSystemWin32.hxx"
 #else
-#   include "SettingsUNIX.hxx"
-#   include "OSystemUNIX.hxx"
+#   include "os_dependent/SettingsUNIX.hxx"
+#   include "os_dependent/OSystemUNIX.hxx"
 #endif
 
-#include "fifo_controller.h"
-#include "internal_controller.h"
-#include "Constants.h"
+#include "control/fifo_controller.h"
+#include "control/internal_controller.h"
+#include "common/Constants.h"
 
 // ALE Version number
 static const std::string Version = "0.3";

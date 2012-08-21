@@ -9,7 +9,7 @@
 #include "SDL/SDL_gfxPrimitives.h"
 #include "Constants.h"
 #include "export_screen.h"
-#include "MediaSrc.hxx"
+#include "../emucore/MediaSrc.hxx"
 
 class SDLEventHandler {
 public:

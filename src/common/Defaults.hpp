@@ -17,7 +17,7 @@
 #ifndef __DEFAULTS_HPP__
 #define __DEFAULTS_HPP__
 
-#include "Settings.hxx"
+#include "../emucore/Settings.hxx"
 
 /** Sets all of the ALE-specific default settings */
 void setDefaultSettings(Settings &settings);
