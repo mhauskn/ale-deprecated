@@ -16,6 +16,7 @@
 #include "control/internal_controller.h"
 #include "common/Constants.h"
 #include "common/Defaults.hpp"
+#include "common/visual_processor.h"
 #include "games/RomSettings.hpp"
 #include "games/Roms.hpp"
 #include "agents/PlayerAgent.hpp"
@@ -45,27 +46,27 @@ class ALEInterface
 public:
     OSystem* theOSystem;
     InternalController* game_controller;
-
     MediaSource *mediasrc;
-    int screen_width, screen_height;
-    IntMatrix screen_matrix;
-    IntVect ram_content;
-
     System* emulator_system;
     RomSettings* game_settings;
+    VisualProcessor* visProc;
 
-    int skip_frames_num;         // Indicates if we take actions on each timestep or skip some frames
+    int screen_width, screen_height;  // Dimensions of the screen
+    IntMatrix screen_matrix;     // This contains the raw pixel representation of the screen
+    IntVect ram_content;         // This contains the ram content of the Atari
+
     int frame;                   // Current frame number
     int max_num_frames;          // Maximum number of frames allowed in this episode
     float game_score;            // Score accumulated throughout the course of a game
-    ActionVect *allowed_actions; // Vector of allowed actions for this game
+    ActionVect allowed_actions;  // Vector of allowed actions for this game
     Action last_action;          // Always stores the latest action taken
     time_t time_start, time_end; // Used to keep track of fps
     bool display_active;         // Should the screen be displayed or not
+    bool process_screen;         // Should visual processing be performed or not
 
 public:
     ALEInterface(): theOSystem(NULL), game_controller(NULL), mediasrc(NULL), emulator_system(NULL),
-                    game_settings(NULL), skip_frames_num(0), frame(0), max_num_frames(-1),
+                    game_settings(NULL), frame(0), max_num_frames(-1),
                     game_score(0), display_active(false) {
     }
 
@@ -77,6 +78,7 @@ public:
     // Loads and initializes a game. After this call the game should be ready to play.
     bool loadROM(string rom_file, bool display_screen, bool process_screen) {
         display_active = display_screen;
+        this->process_screen = process_screen;
         int argc = 8;
         char** argv = new char*[argc];
         for (int i=0; i<=argc; i++) {
@@ -96,6 +98,7 @@ public:
         std::cerr << welcomeMessage() << endl;
     
         if (theOSystem) delete theOSystem;
+
 #ifdef WIN32
         theOSystem = new OSystemWin32();
         SettingsWin32 settings(theOSystem);
@@ -137,9 +140,6 @@ public:
             return false;
         }
 
-        // Get the max number of frames per episode
-        max_num_frames = theOSystem->settings().getInt("max_num_frames_per_episode",true);
-
         // Seed the Random number generator
         if (theOSystem->settings().getString("random_seed") == "time") {
             cout << "Random Seed: Time" << endl;
@@ -178,10 +178,10 @@ public:
 
         emulator_system = &theOSystem->console().system();
         game_settings = buildRomRLWrapper(theOSystem->romFile());
-        // skip_frames_num = game_settings->i_skip_frames_num;
-        // allowed_actions = game_settings->pv_possible_actions;
+        visProc = theOSystem->p_vis_proc;
+        allowed_actions = game_settings->getAvailableActions();
     
-        game_controller->systemReset();
+        reset_game();
 
         return true;
     }
@@ -190,7 +190,10 @@ public:
     void reset_game() {
         game_controller->systemReset();
         
+        game_settings->step(*emulator_system);
+        
         // Get the first screen
+        mediasrc->update();
         int ind_i, ind_j;
         uInt8* pi_curr_frame_buffer = mediasrc->currentFrameBuffer();
         for (int i = 0; i < screen_width * screen_height; i++) {
@@ -206,64 +209,103 @@ public:
             offset &= 0x7f; // there are only 128 bytes
             ram_content[i] = emulator_system->peek(offset + 0x80);
         }
+
+        // Record the starting time of this game
+        time_start = time(NULL);
     }
 
-    // Indicates if the game has ended either naturally or due to exceeding
-    // the frame limit.
+    // Indicates if the game has ended
     bool game_over() {
-        return game_controller->has_terminated() ||
-            //game_settings->is_end_of_game(&screen_matrix,&ram_content,frame) ||
-            (max_num_frames > -1 && frame >= max_num_frames);
+        return game_settings->isTerminal();
     }
 
     // Applies an action to the game and returns the reward. It is the user's responsibility
     // to check if the game has ended and reset when necessary -- this method will keep pressing
     // buttons on the game over screen.
     float act(Action action) {
+        frame++;
         float action_reward = 0;
-        for (int fskip = 0; fskip <= skip_frames_num; fskip++) {
-            frame++;
             
-            // Apply action to simulator and update the simulator
-            game_controller->getState()->apply_action(action, PLAYER_B_NOOP);
-            //theOSystem->applyAction(action);
+        game_settings->step(*emulator_system);
 
-            // Get the latest screen
-            int ind_i, ind_j;
-            uInt8* pi_curr_frame_buffer = mediasrc->currentFrameBuffer();
-            for (int i = 0; i < screen_width * screen_height; i++) {
-                uInt8 v = pi_curr_frame_buffer[i];
-                ind_i = i / screen_width;
-                ind_j = i - (ind_i * screen_width);
-                screen_matrix[ind_i][ind_j] = v;
-            }
+        // Apply action to simulator and update the simulator
+        game_controller->getState()->apply_action(action, PLAYER_B_NOOP);
 
-            // Get the latest ram content
-            for(int i = 0; i<RAM_LENGTH; i++) {
-                int offset = i;
-                offset &= 0x7f; // there are only 128 bytes
-                ram_content[i] = emulator_system->peek(offset + 0x80);
-            }
+        // Get the latest screen
+        mediasrc->update();
+        int ind_i, ind_j;
+        uInt8* pi_curr_frame_buffer = mediasrc->currentFrameBuffer();
+        for (int i = 0; i < screen_width * screen_height; i++) {
+            uInt8 v = pi_curr_frame_buffer[i];
+            ind_i = i / screen_width;
+            ind_j = i - (ind_i * screen_width);
+            screen_matrix[ind_i][ind_j] = v;
+        }
 
-            // Get the reward
-            action_reward += game_settings->getReward();
+        // Get the latest ram content
+        for(int i = 0; i<RAM_LENGTH; i++) {
+            int offset = i;
+            offset &= 0x7f; // there are only 128 bytes
+            ram_content[i] = emulator_system->peek(offset + 0x80);
+        }
 
-            if (frame % 1000 == 0) {
-                time_end = time(NULL);
-                double avg = ((double)frame)/(time_end - time_start);
-                cerr << "Average main loop iterations per sec = " << avg << endl;
-            }
+        // Get the reward
+        action_reward += game_settings->getReward();
+
+        if (frame % 1000 == 0) {
+            time_end = time(NULL);
+            double avg = ((double)frame)/(time_end - time_start);
+            cerr << "Average main loop iterations per sec = " << avg << endl;
         }
 
         // Display the screen
         if (display_active) {
             theOSystem->p_display_screen->display_screen(screen_matrix, screen_width, screen_height);
+            //theOSystem->p_display_screen->display_screen(*mediasrc);            
+        }
+        if (process_screen) {
+            theOSystem->p_vis_proc->process_image(*mediasrc, action);
         }
 
         game_score += action_reward;
         last_action = action;
         return action_reward;
     }
+
+    //****************** Visual Processing Methods ********************//
+    // These are only active if the process_screen variable is set to
+    // true when the load_rom method is invoked. For detail info see
+    // src/common/visual_processor.h
+    //*****************************************************************//    
+    
+    // Returns the (x,y) pixel location of the centroid of the self object
+    // or (-1,-1) if the self is not detected.
+    point getSelfLocation() {
+        assert(process_screen && visProc);
+        return visProc->get_self_centroid();
+    };
+
+    // Returns a pointer to the vector of object classes. Each object
+    // class may or may not contain objects on screen. See Prototype
+    // class in visual_processor.h
+    vector<Prototype>* getDetectedObjectClasses() {
+        assert(process_screen && visProc);
+        return &(visProc->manual_obj_classes);        
+    };
+
+    // Returns a vector of (x,y) pixel locations of the centroids of any
+    // objects of the given object class on the current screen.
+    vector<point> getObjLocations(const Prototype& proto) {
+        assert(process_screen && visProc);
+        vector<point> v;
+        for (set<long>::iterator it=proto.obj_ids.begin(); it!=proto.obj_ids.end(); it++) {
+            long obj_id = *it;
+            assert(visProc->composite_objs.find(obj_id) != visProc->composite_objs.end());
+            point obj_centroid = visProc->composite_objs[obj_id].get_centroid();
+            v.push_back(obj_centroid);
+        }
+        return v;
+    };
 };
 
 #endif
