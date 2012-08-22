@@ -10,3 +10,4 @@ This repo contains the following modifications to the ALE base code:
 * Capable of displaying game screen as the agent learns. (See display_screen parameter) 
 * Ability to pause the game or start manually controlling the game.
 * Visual Processing Framework. (See process_screen parameter)
+* Dynamic library for creating and controlling Atari games externally.
