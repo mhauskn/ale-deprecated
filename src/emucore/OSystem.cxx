@@ -452,16 +452,16 @@ void OSystem::deleteConsole()
   #ifdef CHEATCODE_SUPPORT
     myCheatManager->saveCheats(myConsole->properties().get(Cartridge_MD5));
   #endif
-    if(mySettings->getBool("showinfo"))
-    {
-      double executionTime   = (double) myTimingInfo.totalTime / 1000000.0;
-      double framesPerSecond = (double) myTimingInfo.totalFrames / executionTime;
-      cerr << "Game console stats:" << endl
-           << "  Total frames drawn: " << myTimingInfo.totalFrames << endl
-           << "  Total time (sec):   " << executionTime << endl
-           << "  Frames per second:  " << framesPerSecond << endl
-           << endl;
-    }
+    // if(mySettings != NULL && mySettings->getBool("showinfo"))
+    // {
+    //   double executionTime   = (double) myTimingInfo.totalTime / 1000000.0;
+    //   double framesPerSecond = (double) myTimingInfo.totalFrames / executionTime;
+    //   cerr << "Game console stats:" << endl
+    //        << "  Total frames drawn: " << myTimingInfo.totalFrames << endl
+    //        << "  Total time (sec):   " << executionTime << endl
+    //        << "  Frames per second:  " << framesPerSecond << endl
+    //        << endl;
+    // }
     delete myConsole;  
     myConsole = NULL;
   }

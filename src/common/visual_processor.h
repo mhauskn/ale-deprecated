@@ -231,6 +231,7 @@ struct Prototype {
 class VisualProcessor : public SDLEventHandler {
 public:
     VisualProcessor(OSystem* _osystem, string myRomFile);
+    ~VisualProcessor() {};
         
     void process_image(const MediaSource& mediaSrc, Action a);
 
