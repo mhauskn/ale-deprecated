@@ -106,14 +106,3 @@ void SpaceInvadersSettings::loadState(Deserializer & ser) {
   m_terminal = ser.getBool();
 }
 
-ActionVect& SpaceInvadersSettings::getAvailableActions() {
-  if (actions.empty()) {
-    // incomplete! for testing purposes
-    actions.push_back(PLAYER_A_NOOP);
-    actions.push_back(PLAYER_A_FIRE);
-    actions.push_back(PLAYER_A_LEFT);
-    actions.push_back(PLAYER_A_RIGHT);
-  }
-
-  return actions;
-}

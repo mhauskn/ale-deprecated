@@ -49,9 +49,6 @@ class SpaceInvadersSettings : public RomSettings {
         // loads the state of the rom settings
         void loadState(Deserializer & ser);
 
-    // Returns a list of available actions. By default, this is all actions. 
-    virtual ActionVect &getAvailableActions();
-    
     private:
 
         bool m_terminal;

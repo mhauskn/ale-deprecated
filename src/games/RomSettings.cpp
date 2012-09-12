@@ -21,10 +21,10 @@ ActionVect RomSettings::actions;
 ActionVect RomSettings::all_actions;
 
 ActionVect& RomSettings::getAvailableActions() {
-  // Default action set
   if (actions.empty()) {
     for (int a = 0; a < PLAYER_B_NOOP; a++)
-      actions.push_back((Action)a);
+      if (isLegal((Action)a))
+        actions.push_back((Action)a);
   }
 
   return actions;
