@@ -164,8 +164,14 @@ bool PlayerAgent::handleSDLEvent(const SDL_Event& event) {
         switch(event.key.keysym.sym) {
         case SDLK_p:
             if (manual_control) {
+                // Set the pause status to whatever it previously was
+                p_osystem->p_display_screen->setPaused(returnToPause);
                 cout << "Returning to Automatic Control." << endl;
             } else {
+                // Capture the pause status and store
+                returnToPause = p_osystem->p_display_screen->paused;
+                cout << "ReturntoPause: " << returnToPause << endl;
+                p_osystem->p_display_screen->setPaused(false);
                 printf("Starting Manual Control. Commands are as follows:\n  -p: return to auto control\n  -arrow keys: joystick movement\n  -space: button/fire\n  -return: no-op\n");
             }
             manual_control = !manual_control;

@@ -135,6 +135,12 @@ void DisplayScreen::poll() {
             if (handlers[i]->handleSDLEvent(event))
                 break;
         }
+
+        // Keep polling while paused. This looks fishy but works... o.O
+        while(paused) {
+            poll();
+            SDL_Delay(10);
+        }
     }
 };
 
@@ -146,10 +152,6 @@ bool DisplayScreen::handleSDLEvent(const SDL_Event& event) {
             paused = !paused;
             if (paused) printf("Paused...\n");
             else printf("Unpaused...\n");
-            while(paused) {
-                poll();
-                SDL_Delay(10);
-            }
             return true;
         case SDLK_h: // Print help info
             printf("Screen Display Commands:\n");

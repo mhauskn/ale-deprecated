@@ -43,22 +43,28 @@ public:
     // Registers a handler for keyboard and mouse events
     void registerEventHandler(SDLEventHandler* handler);
 
+    // Allows other methods to set the paused/unpaused game status
+    void setPaused(bool _paused) { paused = _paused; }
+
     // Implements pause functionality
     bool handleSDLEvent(const SDL_Event& event);
 
     void usage();
 
+
+public:
     // Dimensions of the SDL window
     int window_height, window_width;
+
+    // Maintains the paused/unpaused state of the game
+    bool paused;
+
 
 protected:
     // Checks for SDL events such as keypresses.
     // TODO: Run in a different thread?
     void poll();
 
-    // Maintains the paused/unpaused state of the game
-    bool paused;
-  
     SDL_Surface *screen, *image;
     ExportScreen* export_screen;
 
