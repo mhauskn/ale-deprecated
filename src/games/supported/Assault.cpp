@@ -65,6 +65,8 @@ bool AssaultSettings::isLegal(const Action &a) const {
         case PLAYER_A_RIGHT:
         case PLAYER_A_LEFT:
         case PLAYER_A_UP:
+        case PLAYER_A_LEFTFIRE:
+        case PLAYER_A_RIGHTFIRE:
             return true;
         default:
             return false;
