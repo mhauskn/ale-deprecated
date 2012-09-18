@@ -102,3 +102,10 @@ void UpNDownSettings::loadState(Deserializer & ser) {
   m_terminal = ser.getBool();
 }
 
+ActionVect UpNDownSettings::getStartingActions() {
+    ActionVect startingActions;
+    startingActions.push_back(PLAYER_A_FIRE);
+    return startingActions;
+}
+
+

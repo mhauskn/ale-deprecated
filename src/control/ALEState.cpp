@@ -98,6 +98,14 @@ void ALEState::reset(int numResetSteps) {
     // Don't count these frames
     frame_number--;
   }
+
+  // Apply necessary actions specified by the rom itself
+  ActionVect startingActions = m_settings->getStartingActions();
+  for (int i = 0; i < startingActions.size(); i++) {
+      apply_action(startingActions[i], PLAYER_B_NOOP);
+      simulate();
+      frame_number--;
+  }
 }
 
 /* ***************************************************************************

@@ -49,6 +49,9 @@ class UpNDownSettings : public RomSettings {
         // loads the state of the rom settings
         void loadState(Deserializer & ser);
 
+        // UpNDown requires the fire action to start the game
+        ActionVect getStartingActions();
+
     private:
 
         bool m_terminal;

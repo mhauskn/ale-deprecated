@@ -103,3 +103,8 @@ void DoubleDunkSettings::loadState(Deserializer & ser) {
   m_terminal = ser.getBool();
 }
 
+ActionVect DoubleDunkSettings::getStartingActions() {
+    ActionVect startingActions;
+    startingActions.push_back(PLAYER_A_UPFIRE);
+    return startingActions;
+}

@@ -100,3 +100,8 @@ void AirRaidSettings::loadState(Deserializer & ser) {
   m_terminal = ser.getBool();
 }
 
+ActionVect AirRaidSettings::getStartingActions() {
+    ActionVect startingActions;
+    startingActions.push_back(PLAYER_A_FIRE);
+    return startingActions;
+}

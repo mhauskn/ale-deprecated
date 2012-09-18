@@ -49,6 +49,8 @@ class DoubleDunkSettings : public RomSettings {
         // loads the state of the rom settings
         void loadState(Deserializer & ser);
 
+        ActionVect getStartingActions();
+
     private:
 
         bool m_terminal;

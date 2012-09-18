@@ -100,3 +100,8 @@ void PrivateEyeSettings::loadState(Deserializer & ser) {
   m_terminal = ser.getBool();
 }
 
+ActionVect PrivateEyeSettings::getStartingActions() {
+    ActionVect startingActions;
+    startingActions.push_back(PLAYER_A_UP);
+    return startingActions;
+}

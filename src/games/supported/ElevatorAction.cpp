@@ -102,3 +102,9 @@ void ElevatorActionSettings::loadState(Deserializer & ser) {
   m_terminal = ser.getBool();
 }
 
+ActionVect ElevatorActionSettings::getStartingActions() {
+    ActionVect startingActions;
+    for (int i=0; i<16; i++)
+        startingActions.push_back(PLAYER_A_FIRE);
+    return startingActions;
+}

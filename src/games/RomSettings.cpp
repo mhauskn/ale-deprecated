@@ -39,3 +39,7 @@ ActionVect& RomSettings::getAllActions() {
 
   return all_actions;
 }
+
+ActionVect RomSettings::getStartingActions() {
+    return ActionVect();
+}

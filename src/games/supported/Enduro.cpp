@@ -118,3 +118,8 @@ void EnduroSettings::loadState(Deserializer & ser) {
   m_terminal = ser.getBool();
 }
 
+ActionVect EnduroSettings::getStartingActions() {
+    ActionVect startingActions;
+    startingActions.push_back(PLAYER_A_FIRE);
+    return startingActions;
+}

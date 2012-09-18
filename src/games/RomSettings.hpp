@@ -61,6 +61,10 @@ struct RomSettings {
 
     ActionVect &getAllActions();
 
+    // Returns a list of actions that are required to start the game.
+    // By default this is an empty list.
+    virtual ActionVect getStartingActions();
+
     protected:
       static ActionVect actions;
       static ActionVect all_actions;

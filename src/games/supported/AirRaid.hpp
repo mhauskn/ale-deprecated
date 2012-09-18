@@ -49,7 +49,9 @@ class AirRaidSettings : public RomSettings {
         // loads the state of the rom settings
         void loadState(Deserializer & ser);
 
-    private:
+        ActionVect getStartingActions();    
+
+     private:
 
         bool m_terminal;
         reward_t m_reward;

@@ -101,3 +101,8 @@ void PitfallSettings::loadState(Deserializer & ser) {
   m_terminal = ser.getBool();
 }
 
+ActionVect PitfallSettings::getStartingActions() {
+    ActionVect startingActions;
+    startingActions.push_back(PLAYER_A_UP);
+    return startingActions;
+}

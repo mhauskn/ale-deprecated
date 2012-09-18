@@ -49,6 +49,9 @@ class YarsRevengeSettings : public RomSettings {
         // loads the state of the rom settings
         void loadState(Deserializer & ser);
 
+        // Gopher requires the fire action to start the game
+        ActionVect getStartingActions();
+
     private:
 
         bool m_terminal;
