@@ -81,12 +81,10 @@ protected:
 
 protected:
     OSystem* p_osystem;               // Pointer to the stella's OSystem 
-    RomSettings* p_rom_settings;  // An instance of the GameSettings class
+    RomSettings* p_rom_settings;      // An instance of the GameSettings class
 		
     int i_max_num_episodes;           // We exit the program after this 
-    // number of episodes
-    int i_max_num_frames;			  // We exit the program after this 
-    // number of frames
+    int i_max_num_frames;	      // We exit the program after this 
     int i_max_num_frames_per_episode; // Episode ends after this many frames
 
     int frame_number;
@@ -100,7 +98,8 @@ protected:
 
     bool m_has_terminated;
 
-    bool manual_control;  // Is the game being controlled manually?
+    bool returnToPause;               // This is used after manual control is released to set paused state
+    bool manual_control;              // Is the game being controlled manually?
 };
 
 
