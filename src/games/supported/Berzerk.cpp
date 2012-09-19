@@ -9,28 +9,28 @@
  *
  * *****************************************************************************
  */
-#include "Berserk.hpp"
+#include "Berzerk.hpp"
 
 #include "../RomUtils.hpp"
 
 
-BerserkSettings::BerserkSettings() {
+BerzerkSettings::BerzerkSettings() {
 
     reset();
 }
 
 
 /* create a new instance of the rom */
-RomSettings* BerserkSettings::clone() const { 
+RomSettings* BerzerkSettings::clone() const { 
     
-    RomSettings* rval = new BerserkSettings();
+    RomSettings* rval = new BerzerkSettings();
     *rval = *this;
     return rval;
 }
 
 
 /* process the latest information from ALE */
-void BerserkSettings::step(const System& system) {
+void BerzerkSettings::step(const System& system) {
 
     // update the reward
     reward_t score = getDecimalScore(95, 94, 93, &system);
@@ -44,21 +44,21 @@ void BerserkSettings::step(const System& system) {
 
 
 /* is end of game */
-bool BerserkSettings::isTerminal() const {
+bool BerzerkSettings::isTerminal() const {
 
     return m_terminal;
 };
 
 
 /* get the most recently observed reward */
-reward_t BerserkSettings::getReward() const { 
+reward_t BerzerkSettings::getReward() const { 
 
     return m_reward; 
 }
 
 
 /* is an action legal */
-bool BerserkSettings::isLegal(const Action &a) const {
+bool BerzerkSettings::isLegal(const Action &a) const {
 
     switch (a) {
         case PLAYER_A_NOOP:
@@ -79,7 +79,7 @@ bool BerserkSettings::isLegal(const Action &a) const {
 
 
 /* reset the state of the game */
-void BerserkSettings::reset() {
+void BerzerkSettings::reset() {
     
     m_reward   = 0;
     m_score    = 0;
@@ -89,14 +89,14 @@ void BerserkSettings::reset() {
 
         
 /* saves the state of the rom settings */
-void BerserkSettings::saveState(Serializer & ser) {
+void BerzerkSettings::saveState(Serializer & ser) {
   ser.putInt(m_reward);
   ser.putInt(m_score);
   ser.putBool(m_terminal);
 }
 
 // loads the state of the rom settings
-void BerserkSettings::loadState(Deserializer & ser) {
+void BerzerkSettings::loadState(Deserializer & ser) {
   m_reward = ser.getInt();
   m_score = ser.getInt();
   m_terminal = ser.getBool();

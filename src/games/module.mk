@@ -14,7 +14,7 @@ MODULE_OBJS := \
 	src/games/supported/BankHeist.o \
 	src/games/supported/BattleZone.o \
 	src/games/supported/BeamRider.o \
-	src/games/supported/Berserk.o \
+	src/games/supported/Berzerk.o \
 	src/games/supported/Bowling.o \
 	src/games/supported/Boxing.o \
 	src/games/supported/Breakout.o \

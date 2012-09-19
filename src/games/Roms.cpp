@@ -24,7 +24,7 @@
 #include "supported/BankHeist.hpp"
 #include "supported/BattleZone.hpp"
 #include "supported/BeamRider.hpp"
-#include "supported/Berserk.hpp"
+#include "supported/Berzerk.hpp"
 #include "supported/Bowling.hpp"
 #include "supported/Boxing.hpp"
 #include "supported/Breakout.hpp"
@@ -89,7 +89,7 @@ static const RomSettings *roms[]  = {
     new BankHeistSettings(),
     new BattleZoneSettings(),
     new BeamRiderSettings(),
-    new BerserkSettings(),
+    new BerzerkSettings(),
     new BowlingSettings(),
     new BoxingSettings(),
     new BreakoutSettings(),

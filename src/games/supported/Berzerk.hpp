@@ -9,18 +9,18 @@
  *
  * *****************************************************************************
  */
-#ifndef __BERSERK_HPP__
-#define __BERSERK_HPP__
+#ifndef __BERZERK_HPP__
+#define __BERZERK_HPP__
 
 #include "../RomSettings.hpp"
 
 
 /* RL wrapper for Berzerk! settings */
-class BerserkSettings : public RomSettings {
+class BerzerkSettings : public RomSettings {
 
     public:
 
-        BerserkSettings();
+        BerzerkSettings();
 
         // reset
         void reset();
@@ -56,5 +56,5 @@ class BerserkSettings : public RomSettings {
         reward_t m_score;
 };
 
-#endif // __BERSERK_HPP__
+#endif // __BERZERK_HPP__
 
