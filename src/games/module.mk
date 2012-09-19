@@ -62,7 +62,7 @@ MODULE_OBJS := \
 	src/games/supported/UpNDown.o \
 	src/games/supported/Venture.o \
 	src/games/supported/VideoPinball.o \
-	src/games/supported/WizardOfWar.o \
+	src/games/supported/WizardOfWor.o \
 	src/games/supported/YarsRevenge.o \
 	src/games/supported/Zaxxon.o \
 

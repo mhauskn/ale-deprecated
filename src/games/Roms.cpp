@@ -72,7 +72,7 @@
 #include "supported/UpNDown.hpp"
 #include "supported/Venture.hpp"
 #include "supported/VideoPinball.hpp"
-#include "supported/WizardOfWar.hpp"
+#include "supported/WizardOfWor.hpp"
 #include "supported/YarsRevenge.hpp"
 #include "supported/Zaxxon.hpp"
 
@@ -137,7 +137,7 @@ static const RomSettings *roms[]  = {
     new UpNDownSettings(),
     new VentureSettings(),
     new VideoPinballSettings(),
-    new WizardOfWarSettings(),
+    new WizardOfWorSettings(),
     new YarsRevengeSettings(),
     new ZaxxonSettings(),
 };

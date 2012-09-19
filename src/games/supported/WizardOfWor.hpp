@@ -9,18 +9,18 @@
  *
  * *****************************************************************************
  */
-#ifndef __WIZARDOFWAR_HPP__
-#define __WIZARDOFWAR_HPP__
+#ifndef __WIZARDOFWOR_HPP__
+#define __WIZARDOFWOR_HPP__
 
 #include "../RomSettings.hpp"
 
 
 /* RL wrapper for Freeway */
-class WizardOfWarSettings : public RomSettings {
+class WizardOfWorSettings : public RomSettings {
 
     public:
 
-        WizardOfWarSettings();
+        WizardOfWorSettings();
 
         // reset
         void reset();
@@ -56,5 +56,5 @@ class WizardOfWarSettings : public RomSettings {
         reward_t m_score;
 };
 
-#endif // __WIZARDOFWAR_HPP__
+#endif // __WIZARDOFWOR_HPP__
 
