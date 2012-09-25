@@ -180,6 +180,7 @@ public:
         game_settings = buildRomRLWrapper(theOSystem->romFile());
         visProc = theOSystem->p_vis_proc;
         allowed_actions = game_settings->getAvailableActions();
+        max_num_frames = theOSystem->settings().getInt("max_num_frames", true);
     
         reset_game();
 
@@ -216,7 +217,7 @@ public:
 
     // Indicates if the game has ended
     bool game_over() {
-        return game_settings->isTerminal();
+        return game_settings->isTerminal() || (max_num_frames > 0 && frame > max_num_frames);
     }
 
     // Applies an action to the game and returns the reward. It is the user's responsibility
