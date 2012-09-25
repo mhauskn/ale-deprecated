@@ -893,7 +893,7 @@ void VisualProcessor::sanitize_objects() {
         CompositeObject& obj = it->second;
 
         // (piyushk) if blob is too small or the velocity is 0, then remove the object
-        if (obj.mask.size < 15) {
+        if (obj.mask.size < 2) {
             to_remove.push_back(obj.id);
             continue;
         }
@@ -1183,7 +1183,10 @@ bool VisualProcessor::saveSelection() {
     }
 
     // Make sure a valid object is selected
-    assert(composite_objs.find(focused_entity_id) != composite_objs.end());
+    if (composite_objs.find(focused_entity_id) == composite_objs.end()) {
+        printf("No valid object selected to save.\n");
+        return false;
+    }
     CompositeObject& obj = composite_objs[focused_entity_id];
     obj.computeMask(curr_blobs); // Recompute the object's mask just to be sure
 
@@ -1280,17 +1283,22 @@ bool VisualProcessor::handleSDLEvent(const SDL_Event& event) {
                     }
                 }
             } else if (focus_level == 1 || focus_level == 2) {
-                // Find an object that is under the click
+                // Find the minimum sized object that is under the click
+                int minMaskSize = numeric_limits<int>::max();
                 for (map<long,CompositeObject>::iterator it=composite_objs.begin();
                      it!=composite_objs.end(); ++it) {
                     CompositeObject& obj = it->second;
                     if (approx_x >= obj.x_min && approx_x <= obj.x_max &&
                         approx_y >= obj.y_min && approx_y <= obj.y_max) {
-                        focused_entity_id = obj.id;
-                        if (focus_level == 1) obj.to_string();
-                        break;
+                        if (obj.mask.size < minMaskSize) {
+                            focused_entity_id = obj.id;
+                            minMaskSize = obj.mask.size;
+                        }
                     }
                 }
+                // Print object info
+                if (focused_entity_id > 0 && focus_level == 1)
+                    composite_objs[focused_entity_id].to_string();                    
                 // To which prototype does this obj belong?
                 if (focus_level == 2 && focused_entity_id > 0) { 
                     long obj_id = focused_entity_id;
@@ -1528,11 +1536,15 @@ void VisualProcessor::plot_objects(IntMatrix& screen_matrix) {
 // Draws a box around the an object
 void VisualProcessor::box_object(CompositeObject& obj, IntMatrix& screen_matrix, int color) {
     for (int x=obj.x_min; x<=obj.x_max; ++x) {
-        screen_matrix[obj.y_min-1][x] = color;
-        screen_matrix[obj.y_max+1][x] = color;
+        if (obj.y_min > 0)
+            screen_matrix[obj.y_min-1][x] = color;
+        if (obj.y_max < screen_height - 1)
+            screen_matrix[obj.y_max+1][x] = color;
     }
     for (int y=obj.y_min; y<=obj.y_max; ++y) {
-        screen_matrix[y][obj.x_min-1] = color;
+        if (obj.x_min > 0)
+            screen_matrix[y][obj.x_min-1] = color;
+        if (obj.x_max < screen_width - 1)
         screen_matrix[y][obj.x_max+1] = color;
     }
 };
