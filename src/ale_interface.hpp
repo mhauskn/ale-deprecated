@@ -95,7 +95,7 @@ public:
         else                strcpy(argv[6],"false");
         strcpy(argv[7],rom_file.c_str());  
 
-        std::cerr << welcomeMessage() << endl;
+        cout << welcomeMessage() << endl;
     
         if (theOSystem) delete theOSystem;
 
@@ -256,7 +256,7 @@ public:
         if (frame % 1000 == 0) {
             time_end = time(NULL);
             double avg = ((double)frame)/(time_end - time_start);
-            cerr << "Average main loop iterations per sec = " << avg << endl;
+            cout << "Average main loop iterations per sec = " << avg << endl;
         }
 
         // Display the screen
